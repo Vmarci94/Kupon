@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "586083082321",
+    "firebase_url": "https://kuponhomework.firebaseio.com",
+    "project_id": "kuponhomework",
+    "storage_bucket": "kuponhomework.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:586083082321:android:be9cbb4dcd513a81",
+        "android_client_info": {
+          "package_name": "hu.bme.vmarci94.homeworok.kupon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "586083082321-8nktl94v30dcpbq89t5lor8o44svrmos.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "hu.bme.vmarci94.homeworok.kupon",
+            "certificate_hash": "9e57347a2704cf556a00a57d5dd9c0562c6a22e5"
+          }
+        },
+        {
+          "client_id": "586083082321-s9t84errcj9o84b16s4gmt600r6cb2he.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuhZeY7eyG5gtdLT0O7K4yOxYp_6h6Uas"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "586083082321-s9t84errcj9o84b16s4gmt600r6cb2he.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

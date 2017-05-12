@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/title_settings">
+        <SwitchPreference
+            android:key="enable_alert"
+            android:summaryOff="@string/label_off"
+            android:summaryOn="@string/label_on"
+            android:title="@string/title_enable_alert" />
+        <SwitchPreference
+            android:key="enable_save"
+            android:summaryOff="@string/label_off"
+            android:summaryOn="@string/label_on"
+            android:title="@string/title_enable_save" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

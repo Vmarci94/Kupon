@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Kupon</string>
+    <string name="title_activity_new_kupon">NewKuponActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="message_read_tag">kupon beolvasása</string>
+    <string name="message_tag_detected">Kupont érzékeltem! Kapd el gyorsan! :)</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <string name="label_on">On</string>
+    <string name="label_off">Off</string>
+
+    <string name="title_settings">Beállítások</string>
+    <string name="title_enable_alert">Közeli kuponok jelzése</string>
+    <string name="title_enable_save">Megszerzett kuponok mentése</string>
+    <string name="dialogTitle">Engedély probléma</string>
+    <string name="explanation">Szükséges a helymeghatározáshoz, az engedély.</string>
+    <string name="exit">megtagad</string>
+    <string name="forward">rendben</string>
+
+    <string name="kupon_activity_title">Új kuponok</string>
+    <string name="kupon_activity_subtitle">Szerezd meg hát mind! :)</string>
+
+</resources>
