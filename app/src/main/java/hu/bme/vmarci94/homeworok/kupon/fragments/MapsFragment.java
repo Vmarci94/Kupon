@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ public class MapsFragment extends DialogFragment implements OnMapReadyCallback {
     private OnDialogListener mOnDialogListener;
     private GoogleMap mMap;
     private ArrayList<Double[]> posLatLong;
+    private SupportMapFragment mapFragment;
 
     public MapsFragment(){
         super();
@@ -48,13 +50,15 @@ public class MapsFragment extends DialogFragment implements OnMapReadyCallback {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         //super.onCreateView(inflater, container, savedInstanceState);
-        mView = inflater.inflate(R.layout.fragment_maps, container, false);
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        return  mView;
+        try {
+            mView = inflater.inflate(R.layout.fragment_maps, container, false);
+            mapFragment = (SupportMapFragment) getFragmentManager()
+                    .findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+            return mView;
+        } catch (InflateException e){
+            return mView;
+        }
     }
 
     @Override
@@ -75,6 +79,11 @@ public class MapsFragment extends DialogFragment implements OnMapReadyCallback {
     @Override
     public void onDetach() {
         super.onDetach();
+        if(mapFragment != null){
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .remove(mapFragment)
+                    .commit();
+        }
         mOnDialogListener.onDialogDismissed(null);
     }
 
