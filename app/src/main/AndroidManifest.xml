@@ -40,6 +40,10 @@
 
         <service android:name=".service.ServiceLocation" />
 
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAhQjySPVQWDPj-Mj3rbzeXHEPE6w_tyhQ" />
+
     </application>
 
 </manifest>

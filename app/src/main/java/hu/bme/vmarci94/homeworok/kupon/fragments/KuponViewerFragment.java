@@ -19,7 +19,7 @@ import hu.bme.vmarci94.homeworok.kupon.R;
  * Created by vmarci94 on 2017.05.06..
  */
 
-public class KuponReaderFragment extends DialogFragment {
+public class KuponViewerFragment extends DialogFragment {
 
     public static final String TAG = NFCReadFragment.class.getSimpleName();
     private static final String imgUrl = "url";
@@ -30,19 +30,19 @@ public class KuponReaderFragment extends DialogFragment {
     ImageView img;
 
 
-    public static KuponReaderFragment newInstance(String kuponImgUrl){
-        KuponReaderFragment myKuponReaderFragment =  new KuponReaderFragment();
+    public static KuponViewerFragment newInstance(String kuponImgUrl){
+        KuponViewerFragment myKuponViewerFragment =  new KuponViewerFragment();
         Bundle args = new Bundle();
         args.putString(imgUrl, kuponImgUrl);
-        myKuponReaderFragment.setArguments(args);
-        return myKuponReaderFragment;
+        myKuponViewerFragment.setArguments(args);
+        return myKuponViewerFragment;
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        mView = inflater.inflate(R.layout.fragment_kupon_read,container,false);
+        mView = inflater.inflate(R.layout.fragment_kupon_viewer,container,false);
         img = (ImageView) mView.findViewById(R.id.img);
 
         String str = getArguments().getString(imgUrl);

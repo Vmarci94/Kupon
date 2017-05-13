@@ -343,4 +343,10 @@ public class LoginFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onDestroy() {
+        mGoogleApiClient.disconnect();
+        mAuth.signOut();
+        super.onDestroy();
+    }
 }

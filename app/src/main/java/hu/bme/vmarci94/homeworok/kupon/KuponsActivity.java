@@ -35,7 +35,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import hu.bme.vmarci94.homeworok.kupon.adapter.KuponAdapter;
 import hu.bme.vmarci94.homeworok.kupon.data.Kupon;
-import hu.bme.vmarci94.homeworok.kupon.fragments.KuponReaderFragment;
+import hu.bme.vmarci94.homeworok.kupon.fragments.KuponViewerFragment;
 import hu.bme.vmarci94.homeworok.kupon.fragments.NFCReadFragment;
 import hu.bme.vmarci94.homeworok.kupon.interfaces.OnDialogListener;
 import hu.bme.vmarci94.homeworok.kupon.interfaces.OnKuponClickListener;
@@ -50,14 +50,17 @@ public class KuponsActivity extends AppCompatActivity
     private RecyclerView recyclerViewPosts;
     private KuponAdapter kuponAdapter;
 
-    //A kuon olvasáshoz NFC tag technológiával
+    //A kupon olvasáshoz NFC tag technológiával
     private NfcAdapter mNfcAdapter;
-    private NFCReadFragment mNfcReadFragment;
+
+    //Fragmentek
     private boolean isDialogDisplayed = false;
 
-    private KuponReaderFragment mKuponReaderFragment;
+    private NFCReadFragment mNfcReadFragment;
+    private KuponViewerFragment mKuponViewerFragment;
 
-    @Override
+
+   @Override
     protected void onCreate(Bundle savedInstanceState) {
         //[START] Generált kód
         super.onCreate(savedInstanceState);
@@ -102,13 +105,13 @@ public class KuponsActivity extends AppCompatActivity
             @Override
             public void onKuponClicked(String imgKupinUrl) {
 
-                mKuponReaderFragment = (KuponReaderFragment) getSupportFragmentManager().findFragmentByTag(KuponReaderFragment.TAG);
+                mKuponViewerFragment = (KuponViewerFragment) getSupportFragmentManager().findFragmentByTag(KuponViewerFragment.TAG);
 
-                if (mKuponReaderFragment == null) {
+                if (mKuponViewerFragment == null) {
 
-                    mKuponReaderFragment = mKuponReaderFragment.newInstance(imgKupinUrl);
+                    mKuponViewerFragment = mKuponViewerFragment.newInstance(imgKupinUrl);
                 }
-                mKuponReaderFragment.show(getSupportFragmentManager(),mKuponReaderFragment.TAG);
+                mKuponViewerFragment.show(getSupportFragmentManager(), mKuponViewerFragment.TAG);
 
             }
 
@@ -172,29 +175,6 @@ public class KuponsActivity extends AppCompatActivity
             logout();
         }
     }
-/*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.new_kupon, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-*/
     private void logout(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Biztosan ki akarsz jelentkezni?")
@@ -354,11 +334,6 @@ public class KuponsActivity extends AppCompatActivity
         LocalBroadcastManager.getInstance( this ).registerReceiver(
                 mMessageReceiver,
                 new IntentFilter(ServiceLocation.BR_NEW_LOCATION));
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                mMessageReceiver,
-                new IntentFilter(ServiceLocation.PROX_KUPON_ALERT_INTENT));
-
     }
 
     @Override
@@ -373,13 +348,6 @@ public class KuponsActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             Location currentLocation = intent.getParcelableExtra(ServiceLocation.KEY_LOCATION);
-
-            Boolean entering = intent.getBooleanExtra(ServiceLocation.PROX_KUPON_ALERT_INTENT, false);
-            if(entering){
-                Toast.makeText(KuponsActivity.this ,"Kupon a közelben!", Toast.LENGTH_LONG).show();
-            }
-
-
             printLocationToLog(
                     currentLocation.getLatitude(),
                     currentLocation.getLongitude()
