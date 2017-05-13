@@ -5,11 +5,11 @@
     android:layout_height="match_parent">
 
     <fragment
+        android:id="@+id/map"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/map"
-        tools:context=".MapsActivity"
+        tools:context="hu.bme.vmarci94.homeworok.kupon.fragments.MapsFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment" />
 
 

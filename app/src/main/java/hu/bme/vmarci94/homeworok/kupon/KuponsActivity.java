@@ -36,6 +36,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import hu.bme.vmarci94.homeworok.kupon.adapter.KuponAdapter;
 import hu.bme.vmarci94.homeworok.kupon.data.Kupon;
 import hu.bme.vmarci94.homeworok.kupon.fragments.KuponViewerFragment;
+import hu.bme.vmarci94.homeworok.kupon.fragments.MapsFragment;
 import hu.bme.vmarci94.homeworok.kupon.fragments.NFCReadFragment;
 import hu.bme.vmarci94.homeworok.kupon.interfaces.OnDialogListener;
 import hu.bme.vmarci94.homeworok.kupon.interfaces.OnKuponClickListener;
@@ -58,7 +59,7 @@ public class KuponsActivity extends AppCompatActivity
 
     private NFCReadFragment mNfcReadFragment;
     private KuponViewerFragment mKuponViewerFragment;
-
+    private MapsFragment mMapsFragment;
 
    @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,8 +192,12 @@ public class KuponsActivity extends AppCompatActivity
         int id = item.getItemId();
 
         switch (id){
-            case R.id.nav_camera:{
+            case R.id.nav_nfc:{
                 showNFCReadFragment();
+                break;
+            }
+            case R.id.nav_map_show_all_kupon:{
+                showMapFragment();
                 break;
             }
             case R.id.nav_manage:{
@@ -218,6 +223,17 @@ public class KuponsActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void showMapFragment() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        mMapsFragment = (MapsFragment) getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG);
+        if(mMapsFragment == null){
+            mMapsFragment = MapsFragment.newInstace(kuponAdapter.getAllKupon()); //FIXME add oda az összes kupon helyzetét double párként egy arraylist-el
+        }
+        mMapsFragment.show(getSupportFragmentManager(), MapsFragment.TAG);
+
     }
 
     public void showSettingsActivity(){

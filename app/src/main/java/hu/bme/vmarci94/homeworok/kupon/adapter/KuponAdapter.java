@@ -139,11 +139,11 @@ public class KuponAdapter extends RecyclerView.Adapter<KuponAdapter.ViewHolder> 
     }
 
     public ArrayList<Double[]> getAllKupon(){
-        ArrayList<Double[]> localate = new ArrayList<>();
+        ArrayList<Double[]> posLatLong = new ArrayList<>();
         for(int i = 0; i < kuponArrayMap.size(); i++){
-            localate.add(new Double[]{kuponArrayMap.valueAt(i).getLatitude(), kuponArrayMap.valueAt(i).getLongitude()});
+            posLatLong.add(new Double[]{kuponArrayMap.valueAt(i).getLatitude(), kuponArrayMap.valueAt(i).getLongitude()});
         }
-        return localate;
+        return posLatLong;
     }
 
     public void update(String key){
