@@ -23,5 +23,11 @@
 
     <string name="kupon_activity_title">Új kuponok</string>
     <string name="kupon_activity_subtitle">Szerezd meg hát mind! :)</string>
+    <string name="loading">Betöltése</string>
+    <string name="engedély">Muszáj az engedély a navigációs funkciókhoz</string>
+    <string name="engedély_title">kupontérkép</string>
+    <string name="nem">nem</string>
+    <string name="ok">ok</string>
+    <string name="no">nem</string>
 
 </resources>

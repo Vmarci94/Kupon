@@ -1,14 +1,22 @@
 package hu.bme.vmarci94.homeworok.kupon;
 
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.location.Location;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.util.ArrayMap;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -35,29 +43,39 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import hu.bme.vmarci94.homeworok.kupon.adapter.KuponAdapter;
 import hu.bme.vmarci94.homeworok.kupon.data.Kupon;
-import hu.bme.vmarci94.homeworok.kupon.fragments.KuponReaderFragment;
+import hu.bme.vmarci94.homeworok.kupon.fragments.KuponViewerFragment;
+import hu.bme.vmarci94.homeworok.kupon.fragments.MapsFragment;
 import hu.bme.vmarci94.homeworok.kupon.fragments.NFCReadFragment;
 import hu.bme.vmarci94.homeworok.kupon.interfaces.OnDialogListener;
 import hu.bme.vmarci94.homeworok.kupon.interfaces.OnKuponClickListener;
+import hu.bme.vmarci94.homeworok.kupon.interfaces.OnShakeListener;
+import hu.bme.vmarci94.homeworok.kupon.service.ServiceLocation;
 
 
 public class KuponsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnDialogListener {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = KuponsActivity.class.getSimpleName();
 
     //ezek felelnek a felülettel való összekötésért. Definiálás
     private RecyclerView recyclerViewPosts;
     private KuponAdapter kuponAdapter;
 
-    //A kuon olvasáshoz NFC tag technológiával
+    //A kupon olvasáshoz NFC tag technológiával
     private NfcAdapter mNfcAdapter;
-    private NFCReadFragment mNfcReadFragment;
+
+    //Fragmentek
     private boolean isDialogDisplayed = false;
 
-    private KuponReaderFragment mKuponReaderFragment;
+    private NFCReadFragment mNfcReadFragment;
+    private KuponViewerFragment mKuponViewerFragment;
+    private MapsFragment mMapsFragment;
 
-    @Override
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
+    private ShakeDetector mShakeDetector;
+
+   @Override
     protected void onCreate(Bundle savedInstanceState) {
         //[START] Generált kód
         super.onCreate(savedInstanceState);
@@ -85,6 +103,20 @@ public class KuponsActivity extends AppCompatActivity
         View navigationHeaderView = navigationView.inflateHeaderView(R.layout.nav_header_kupon);
         initUserData(navigationHeaderView);
 
+        initSensor();
+    }
+
+    private void initSensor(){
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mAccelerometer = mSensorManager
+                .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mShakeDetector = new ShakeDetector(new OnShakeListener() {
+            @Override
+            public void onShake(int count) {
+                //FIXME
+                Log.i("SENSOR:", "rázkódás érzékelve");
+            }
+        });
     }
 
     private void initUserData(View view) {
@@ -100,21 +132,21 @@ public class KuponsActivity extends AppCompatActivity
     private void initListener() {
         kuponAdapter = new KuponAdapter(getApplicationContext(), new OnKuponClickListener() {
             @Override
-            public void onKuponClicked(String imgKupinUrl) {
+            public void onKuponClicked(ImageView img) {
 
-                mKuponReaderFragment = (KuponReaderFragment) getSupportFragmentManager().findFragmentByTag(KuponReaderFragment.TAG);
+                mKuponViewerFragment = (KuponViewerFragment) getSupportFragmentManager().findFragmentByTag(KuponViewerFragment.TAG);
 
-                if (mKuponReaderFragment == null) {
+                if (mKuponViewerFragment == null) {
 
-                    mKuponReaderFragment = mKuponReaderFragment.newInstance(imgKupinUrl);
+                    mKuponViewerFragment = mKuponViewerFragment.newInstance(img);
                 }
-                mKuponReaderFragment.show(getSupportFragmentManager(),mKuponReaderFragment.TAG);
+                mKuponViewerFragment.show(getSupportFragmentManager(), mKuponViewerFragment.TAG);
 
             }
 
             @Override
-            public void onKuponLongClick() {
-
+            public void onKuponLongClick(String key, Kupon kupon) {
+                showMapFragment(key, kupon);
             }
 
         });
@@ -172,29 +204,6 @@ public class KuponsActivity extends AppCompatActivity
             logout();
         }
     }
-/*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.new_kupon, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-*/
     private void logout(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Biztosan ki akarsz jelentkezni?")
@@ -211,8 +220,12 @@ public class KuponsActivity extends AppCompatActivity
         int id = item.getItemId();
 
         switch (id){
-            case R.id.nav_camera:{
+            case R.id.nav_nfc:{
                 showNFCReadFragment();
+                break;
+            }
+            case R.id.nav_map_show_all_kupon:{
+                showMapFragment(null, null);
                 break;
             }
             case R.id.nav_manage:{
@@ -227,17 +240,47 @@ public class KuponsActivity extends AppCompatActivity
                 logout();
                 break;
             }
-            case R.id.nav_share:{
-                break;
-            }
-            case R.id.nav_send:{
-                break;
-            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /* FIXME --> elfordulásra kifagy
+    private void showMapFragment(@Nullable String key, @Nullable Kupon kupon) {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if(drawer != null && drawer.isDrawerOpen(GravityCompat.START)){
+            drawer.closeDrawer(GravityCompat.START);
+        }
+        FragmentManager ft= getSupportFragmentManager();
+        if(key == null && kupon == null) {
+            mMapsFragment = MapsFragment.newInstace(kuponAdapter.getAllKupon());
+        }else{
+            ArrayMap<String, Kupon> tmp = new ArrayMap<>();
+            tmp.put(key, kupon);
+            mMapsFragment = MapsFragment.newInstace( tmp );
+        }
+        mMapsFragment.show(ft, MapsFragment.TAG);
+
+    }*/
+
+
+    private void showMapFragment(@Nullable String key, @Nullable Kupon kupon) {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        mMapsFragment = (MapsFragment) getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG);
+        if(mMapsFragment == null){
+            if(key == null && kupon == null) {
+                mMapsFragment = MapsFragment.newInstace(kuponAdapter.getAllKupon());
+            }else {
+                ArrayMap<String, Kupon> tmp = new ArrayMap<>();
+                tmp.put(key, kupon);
+                mMapsFragment = MapsFragment.newInstace( tmp );
+            }
+        }
+        mMapsFragment.show(getSupportFragmentManager(), MapsFragment.TAG);
+
     }
 
     public void showSettingsActivity(){
@@ -281,7 +324,7 @@ public class KuponsActivity extends AppCompatActivity
     @Override
     public void onDialogDisplayed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
         isDialogDisplayed = true;
@@ -299,6 +342,7 @@ public class KuponsActivity extends AppCompatActivity
 
 
 
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -312,13 +356,18 @@ public class KuponsActivity extends AppCompatActivity
         if(mNfcAdapter!= null)
             mNfcAdapter.enableForegroundDispatch(this, pendingIntent, nfcIntentFilter, null);
 
+        mSensorManager.registerListener(mShakeDetector, mAccelerometer,	SensorManager.SENSOR_DELAY_UI); //beregisztrálunk a Sensoreseményre
+
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
+
+        mSensorManager.unregisterListener(mShakeDetector);
         if(mNfcAdapter!= null)
             mNfcAdapter.disableForegroundDispatch(this);
+        super.onPause();
+
     }
 
     @Override
@@ -347,18 +396,14 @@ public class KuponsActivity extends AppCompatActivity
         }
     }
 
-    /*
+
+
     @Override
     public void onStart() {
         super.onStart();
         LocalBroadcastManager.getInstance( this ).registerReceiver(
                 mMessageReceiver,
                 new IntentFilter(ServiceLocation.BR_NEW_LOCATION));
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                mMessageReceiver,
-                new IntentFilter(ServiceLocation.PROX_KUPON_ALERT_INTENT));
-
     }
 
     @Override
@@ -374,17 +419,11 @@ public class KuponsActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             Location currentLocation = intent.getParcelableExtra(ServiceLocation.KEY_LOCATION);
 
-            Boolean entering = intent.getBooleanExtra(ServiceLocation.PROX_KUPON_ALERT_INTENT, false);
-            if(entering){
-                Toast.makeText(KuponsActivity.this ,"Kupon a közelben!", Toast.LENGTH_LONG).show();
-            }
-
-
             printLocationToLog(
                     currentLocation.getLatitude(),
                     currentLocation.getLongitude()
             );
         }
-    };*/
+    };
 
 }
