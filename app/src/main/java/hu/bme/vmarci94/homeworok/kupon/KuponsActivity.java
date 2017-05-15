@@ -1,15 +1,21 @@
 package hu.bme.vmarci94.homeworok.kupon;
 
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.location.Location;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -42,6 +48,8 @@ import hu.bme.vmarci94.homeworok.kupon.fragments.MapsFragment;
 import hu.bme.vmarci94.homeworok.kupon.fragments.NFCReadFragment;
 import hu.bme.vmarci94.homeworok.kupon.interfaces.OnDialogListener;
 import hu.bme.vmarci94.homeworok.kupon.interfaces.OnKuponClickListener;
+import hu.bme.vmarci94.homeworok.kupon.interfaces.OnShakeListener;
+import hu.bme.vmarci94.homeworok.kupon.service.ServiceLocation;
 
 
 public class KuponsActivity extends AppCompatActivity
@@ -62,6 +70,10 @@ public class KuponsActivity extends AppCompatActivity
     private NFCReadFragment mNfcReadFragment;
     private KuponViewerFragment mKuponViewerFragment;
     private MapsFragment mMapsFragment;
+
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
+    private ShakeDetector mShakeDetector;
 
    @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +103,20 @@ public class KuponsActivity extends AppCompatActivity
         View navigationHeaderView = navigationView.inflateHeaderView(R.layout.nav_header_kupon);
         initUserData(navigationHeaderView);
 
+        initSensor();
+    }
+
+    private void initSensor(){
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mAccelerometer = mSensorManager
+                .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mShakeDetector = new ShakeDetector(new OnShakeListener() {
+            @Override
+            public void onShake(int count) {
+                //FIXME
+                Log.i("SENSOR:", "rázkódás érzékelve");
+            }
+        });
     }
 
     private void initUserData(View view) {
@@ -221,6 +247,25 @@ public class KuponsActivity extends AppCompatActivity
         return true;
     }
 
+    /* FIXME --> elfordulásra kifagy
+    private void showMapFragment(@Nullable String key, @Nullable Kupon kupon) {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if(drawer != null && drawer.isDrawerOpen(GravityCompat.START)){
+            drawer.closeDrawer(GravityCompat.START);
+        }
+        FragmentManager ft= getSupportFragmentManager();
+        if(key == null && kupon == null) {
+            mMapsFragment = MapsFragment.newInstace(kuponAdapter.getAllKupon());
+        }else{
+            ArrayMap<String, Kupon> tmp = new ArrayMap<>();
+            tmp.put(key, kupon);
+            mMapsFragment = MapsFragment.newInstace( tmp );
+        }
+        mMapsFragment.show(ft, MapsFragment.TAG);
+
+    }*/
+
+
     private void showMapFragment(@Nullable String key, @Nullable Kupon kupon) {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -297,6 +342,7 @@ public class KuponsActivity extends AppCompatActivity
 
 
 
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -310,13 +356,18 @@ public class KuponsActivity extends AppCompatActivity
         if(mNfcAdapter!= null)
             mNfcAdapter.enableForegroundDispatch(this, pendingIntent, nfcIntentFilter, null);
 
+        mSensorManager.registerListener(mShakeDetector, mAccelerometer,	SensorManager.SENSOR_DELAY_UI); //beregisztrálunk a Sensoreseményre
+
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
+
+        mSensorManager.unregisterListener(mShakeDetector);
         if(mNfcAdapter!= null)
             mNfcAdapter.disableForegroundDispatch(this);
+        super.onPause();
+
     }
 
     @Override
@@ -345,7 +396,8 @@ public class KuponsActivity extends AppCompatActivity
         }
     }
 
-    /*
+
+
     @Override
     public void onStart() {
         super.onStart();
@@ -366,11 +418,12 @@ public class KuponsActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             Location currentLocation = intent.getParcelableExtra(ServiceLocation.KEY_LOCATION);
+
             printLocationToLog(
                     currentLocation.getLatitude(),
                     currentLocation.getLongitude()
             );
         }
-    };*/
+    };
 
 }

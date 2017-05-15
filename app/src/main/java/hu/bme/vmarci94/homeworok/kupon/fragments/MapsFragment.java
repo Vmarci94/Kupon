@@ -42,6 +42,9 @@ public class MapsFragment extends DialogFragment implements OnMapReadyCallback{
     private ArrayMap<String, Kupon> kupons;
     private SupportMapFragment mapFragment;
 
+    private static final String KEY_CAMERA_POSITION = "camera_position";
+    private static final String KEY_LOCATION = "location";
+
     public MapsFragment(){
         super();
     }
@@ -54,10 +57,20 @@ public class MapsFragment extends DialogFragment implements OnMapReadyCallback{
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+
         super.onSaveInstanceState(outState);
         mapFragment = (SupportMapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(savedInstanceState != null){
+
+        }
     }
 
     @Nullable
@@ -121,12 +134,11 @@ public class MapsFragment extends DialogFragment implements OnMapReadyCallback{
     public void onDetach() {
         super.onDetach();
         if(mapFragment != null){
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .remove(mapFragment)
-                    .commit();
+            getFragmentManager().beginTransaction().remove(mapFragment).commit();
         }
         mOnDialogListener.onDialogDismissed(null);
     }
+
 
     @Override
     public void onAttach(Context context) {
