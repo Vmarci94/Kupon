@@ -5,13 +5,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
-import com.bumptech.glide.Glide;
 
 import hu.bme.vmarci94.homeworok.kupon.R;
 
@@ -22,7 +19,7 @@ import hu.bme.vmarci94.homeworok.kupon.R;
 public class KuponViewerFragment extends DialogFragment {
 
     public static final String TAG = NFCReadFragment.class.getSimpleName();
-    private static final String imgUrl = "url";
+    private static final String imgId = "ID";
 
 
     //OnDialogListener mOnDialogListener;
@@ -30,11 +27,16 @@ public class KuponViewerFragment extends DialogFragment {
     ImageView img;
 
 
-    public static KuponViewerFragment newInstance(String kuponImgUrl){
+    public static KuponViewerFragment newInstance(ImageView img){
+        KuponViewerFragment myKuponViewerFragment =  new KuponViewerFragment();
+        myKuponViewerFragment.img = img;
+        /*
         KuponViewerFragment myKuponViewerFragment =  new KuponViewerFragment();
         Bundle args = new Bundle();
-        args.putString(imgUrl, kuponImgUrl);
+        args.putInt(imgId, id);
         myKuponViewerFragment.setArguments(args);
+        return myKuponViewerFragment;
+        */
         return myKuponViewerFragment;
     }
 
@@ -43,15 +45,11 @@ public class KuponViewerFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         mView = inflater.inflate(R.layout.fragment_kupon_viewer,container,false);
-        img = (ImageView) mView.findViewById(R.id.img);
-
-        String str = getArguments().getString(imgUrl);
-        if(str == null){
-            Log.e("BIG PROBLEM", "str is null");
-        }else {
-            Glide.with(mView.getContext()).load(str).into(img);
-        }
-
+        ImageView tmp = (ImageView) mView.findViewById(R.id.img);
+        //tmp.setImageResource(R.drawable.error);
+        tmp = img;
+        //img = (ImageView) mView.findViewById(R.id.img);
+        //img = (ImageView) getActivity().findViewById(getArguments().getInt(imgId));
         return mView;
     }
 

@@ -2,10 +2,13 @@ package hu.bme.vmarci94.homeworok.kupon;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import java.util.List;
 
@@ -18,9 +21,9 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     public static final String KEY_START_SERVICE = "start_service";
     public static final String KEY_ALERT = "enable_alert";
     public static final String KEY_SAVE = "enable_save";
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 500;
 
     public boolean alert = false;
-    //public boolean startService = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,18 +49,24 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         return true;
     }
 
-
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         switch (key){
             case KEY_START_SERVICE:{
-                boolean startService = sharedPreferences.getBoolean(KEY_START_SERVICE, false);
-                Intent i = new Intent(getApplicationContext(),ServiceLocation.class);
-                if (startService) {
-                    startService(i);
-                } else {
-                    stopService(i);
-                }
+                    Boolean startService = sharedPreferences.getBoolean(KEY_START_SERVICE, false);
+                    if (ContextCompat.checkSelfPermission(SettingsActivity.this,
+                            android.Manifest.permission.ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        Intent i = new Intent(getApplicationContext(), ServiceLocation.class);
+                        if (startService) {
+                            startService(i);
+                        } else {
+                            stopService(i);
+                        }
+                    }else{
+                        Log.e("hiba", "nincs engedély");
+                    }
+
                 break;
             }
             case KEY_SAVE:{
@@ -68,6 +77,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
             }
         }
     }
+
 
     @Override
     public void onBuildHeaders(List<Header> target) {

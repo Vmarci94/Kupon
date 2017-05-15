@@ -2,7 +2,7 @@ package hu.bme.vmarci94.homeworok.kupon.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.ArrayMap;
+import android.support.v4.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +15,6 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
-import java.util.ArrayList;
 
 import hu.bme.vmarci94.homeworok.kupon.R;
 import hu.bme.vmarci94.homeworok.kupon.data.Kupon;
@@ -77,12 +75,14 @@ public class KuponAdapter extends RecyclerView.Adapter<KuponAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(final ViewHolder viewHolder, int position) {
-        Kupon tmpKupon = kuponArrayMap.valueAt(viewHolder.getAdapterPosition()); //FIXME ?
+        final Kupon tmpKupon = kuponArrayMap.valueAt(viewHolder.getAdapterPosition()); //FIXME ?
 
         viewHolder.tvCompany.setText(tmpKupon.getCompany());
         viewHolder.tvDescription.setText(tmpKupon.getDescription());
         viewHolder.tvSale.setText(tmpKupon.getSale());
+
         viewHolder.imgKuponKod.setImageResource(R.drawable.error);
+
         tmpKupon.setImgKupon(viewHolder.imgKuponKod);
 
         //viewHolder.imgKuponKod.setVisibility(View.INVISIBLE); // FIXME et itt még át kell gondolni
@@ -94,7 +94,7 @@ public class KuponAdapter extends RecyclerView.Adapter<KuponAdapter.ViewHolder> 
                 if(listener != null){
                     //Itt már eléred a position-t is
 
-                    listener.onKuponClicked( "dummy");
+                    listener.onKuponClicked( tmpKupon.getImgKupon() );
                 }
             }
         });
@@ -103,7 +103,7 @@ public class KuponAdapter extends RecyclerView.Adapter<KuponAdapter.ViewHolder> 
 
             @Override
             public boolean onLongClick(View v) {
-                listener.onKuponLongClick();
+                listener.onKuponLongClick(kuponArrayMap.keyAt( viewHolder.getAdapterPosition() ), tmpKupon);
                 return true;
             }
         });
@@ -138,12 +138,8 @@ public class KuponAdapter extends RecyclerView.Adapter<KuponAdapter.ViewHolder> 
 //            lastPosition = position;}
     }
 
-    public ArrayList<Double[]> getAllKupon(){
-        ArrayList<Double[]> posLatLong = new ArrayList<>();
-        for(int i = 0; i < kuponArrayMap.size(); i++){
-            posLatLong.add(new Double[]{kuponArrayMap.valueAt(i).getLatitude(), kuponArrayMap.valueAt(i).getLongitude()});
-        }
-        return posLatLong;
+    public final ArrayMap<String, Kupon> getAllKupon(){
+        return this.kuponArrayMap;
     }
 
     public void update(String key){

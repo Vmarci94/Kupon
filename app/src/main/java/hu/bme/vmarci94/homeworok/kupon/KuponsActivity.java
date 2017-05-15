@@ -8,7 +8,9 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.util.ArrayMap;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -104,21 +106,21 @@ public class KuponsActivity extends AppCompatActivity
     private void initListener() {
         kuponAdapter = new KuponAdapter(getApplicationContext(), new OnKuponClickListener() {
             @Override
-            public void onKuponClicked(String imgKupinUrl) {
+            public void onKuponClicked(ImageView img) {
 
                 mKuponViewerFragment = (KuponViewerFragment) getSupportFragmentManager().findFragmentByTag(KuponViewerFragment.TAG);
 
                 if (mKuponViewerFragment == null) {
 
-                    mKuponViewerFragment = mKuponViewerFragment.newInstance(imgKupinUrl);
+                    mKuponViewerFragment = mKuponViewerFragment.newInstance(img);
                 }
                 mKuponViewerFragment.show(getSupportFragmentManager(), mKuponViewerFragment.TAG);
 
             }
 
             @Override
-            public void onKuponLongClick() {
-
+            public void onKuponLongClick(String key, Kupon kupon) {
+                showMapFragment(key, kupon);
             }
 
         });
@@ -197,7 +199,7 @@ public class KuponsActivity extends AppCompatActivity
                 break;
             }
             case R.id.nav_map_show_all_kupon:{
-                showMapFragment();
+                showMapFragment(null, null);
                 break;
             }
             case R.id.nav_manage:{
@@ -212,12 +214,6 @@ public class KuponsActivity extends AppCompatActivity
                 logout();
                 break;
             }
-            case R.id.nav_share:{
-                break;
-            }
-            case R.id.nav_send:{
-                break;
-            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -225,12 +221,18 @@ public class KuponsActivity extends AppCompatActivity
         return true;
     }
 
-    private void showMapFragment() {
+    private void showMapFragment(@Nullable String key, @Nullable Kupon kupon) {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         mMapsFragment = (MapsFragment) getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG);
         if(mMapsFragment == null){
-            mMapsFragment = MapsFragment.newInstace(kuponAdapter.getAllKupon()); //FIXME add oda az összes kupon helyzetét double párként egy arraylist-el
+            if(key == null && kupon == null) {
+                mMapsFragment = MapsFragment.newInstace(kuponAdapter.getAllKupon());
+            }else {
+                ArrayMap<String, Kupon> tmp = new ArrayMap<>();
+                tmp.put(key, kupon);
+                mMapsFragment = MapsFragment.newInstace( tmp );
+            }
         }
         mMapsFragment.show(getSupportFragmentManager(), MapsFragment.TAG);
 

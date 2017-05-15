@@ -1,7 +1,6 @@
 package hu.bme.vmarci94.homeworok.kupon.fragments;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,6 +38,7 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import hu.bme.vmarci94.homeworok.kupon.KuponsActivity;
 import hu.bme.vmarci94.homeworok.kupon.MainActivity;
 import hu.bme.vmarci94.homeworok.kupon.R;
+import hu.bme.vmarci94.homeworok.kupon.Utility;
 
 /**
  * Created by vmarci94 on 2017.05.05..
@@ -55,33 +55,17 @@ public class LoginFragment extends Fragment {
     private static final int RC_SIGN_IN_GOOGLE = 9001;
     private static final int RC_SIGN_OUT = 9002;;
 
-    protected GoogleApiClient mGoogleApiClient;
+    public static GoogleApiClient mGoogleApiClient;
     protected FirebaseAuth mAuth;
     private Uri GoogleAccountPhotoUri; //vagy valami jobb
 
-    private ProgressDialog progressDialog;
-
-    public void showProgressDialog() {
-        if (progressDialog == null) {
-            progressDialog = new ProgressDialog(rootView.getContext());
-            //progressDialog.setCancelable(false);
-            progressDialog.setMessage("Loading...");
-        }
-
-        progressDialog.show();
-    }
-
-    public void hideProgressDialog() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-        }
-    }
+    public Utility utility;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_login, null);
-
+        utility = new Utility(rootView.getContext());
         initView();
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -176,7 +160,7 @@ public class LoginFragment extends Fragment {
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d("Google Sing in", "firebaseAuthWithGoogle:" + acct.getId());
         // [START_EXCLUDE silent]
-        showProgressDialog();
+        utility.showProgressDialog();
         // [END_EXCLUDE]
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -209,14 +193,14 @@ public class LoginFragment extends Fragment {
                                     Toast.LENGTH_SHORT).show();
                         }
                         // [START_EXCLUDE]
-                        hideProgressDialog();
+                        utility.hideProgressDialog();
                         // [END_EXCLUDE]
                     }
                 });
     }
 
     private void logoutFromGoogle() {
-        showProgressDialog();
+        utility.showProgressDialog();
         // Firebase sign out
         mAuth.signOut();
 
@@ -231,7 +215,7 @@ public class LoginFragment extends Fragment {
                         }
                     });
         }
-        hideProgressDialog();
+        utility.hideProgressDialog();
     }
 
     private void Enter(FirebaseUser firebaseUser){
@@ -274,7 +258,7 @@ public class LoginFragment extends Fragment {
         if (!isFormValid()) {
             return;
         }
-        showProgressDialog();
+        utility.showProgressDialog();
 
         mAuth.signInWithEmailAndPassword(
                 etEmail.getText().toString(),
@@ -283,7 +267,7 @@ public class LoginFragment extends Fragment {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
 
-                hideProgressDialog();
+                utility.hideProgressDialog();
 
                 if (task.isSuccessful()) {
                     Enter(mAuth.getCurrentUser());
@@ -306,14 +290,14 @@ public class LoginFragment extends Fragment {
             return;
         }
 
-        showProgressDialog();
+        utility.showProgressDialog();
 
         mAuth.createUserWithEmailAndPassword(
                 etEmail.getText().toString(), etPassword.getText().toString()
         ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                hideProgressDialog();
+                utility.hideProgressDialog();
 
                 if (task.isSuccessful()) {
                     FirebaseUser firebaseUser = task.getResult().getUser();
@@ -335,7 +319,7 @@ public class LoginFragment extends Fragment {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                hideProgressDialog();
+                utility.hideProgressDialog();
                     Toast.makeText(getActivity(),
                             "error: "+e.getMessage(),
                             Toast.LENGTH_SHORT).show();
