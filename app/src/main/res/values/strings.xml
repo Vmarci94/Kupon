@@ -23,5 +23,6 @@
 
     <string name="kupon_activity_title">Új kuponok</string>
     <string name="kupon_activity_subtitle">Szerezd meg hát mind! :)</string>
+    <string name="loading">Betöltése</string>
 
 </resources>

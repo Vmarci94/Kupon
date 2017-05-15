@@ -47,7 +47,7 @@ import hu.bme.vmarci94.homeworok.kupon.interfaces.OnKuponClickListener;
 public class KuponsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnDialogListener {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = KuponsActivity.class.getSimpleName();
 
     //ezek felelnek a felülettel való összekötésért. Definiálás
     private RecyclerView recyclerViewPosts;
@@ -279,7 +279,7 @@ public class KuponsActivity extends AppCompatActivity
     @Override
     public void onDialogDisplayed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
         isDialogDisplayed = true;

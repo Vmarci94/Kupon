@@ -24,7 +24,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import hu.bme.vmarci94.homeworok.kupon.KuponsActivity;
 import hu.bme.vmarci94.homeworok.kupon.R;
-import hu.bme.vmarci94.homeworok.kupon.Utility;
 import hu.bme.vmarci94.homeworok.kupon.data.Kupon;
 import hu.bme.vmarci94.homeworok.kupon.interfaces.OnDialogListener;
 
@@ -42,7 +41,6 @@ public class MapsFragment extends DialogFragment implements OnMapReadyCallback{
     private GoogleMap mMap;
     private ArrayMap<String, Kupon> kupons;
     private SupportMapFragment mapFragment;
-    private Utility utility;
 
     public MapsFragment(){
         super();
@@ -67,16 +65,13 @@ public class MapsFragment extends DialogFragment implements OnMapReadyCallback{
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         try {
             mView = inflater.inflate(R.layout.fragment_maps, container, false);
-            utility = new Utility(mView.getContext());
-            utility.showProgressDialog();
+
             mapFragment = (SupportMapFragment) getFragmentManager()
                     .findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
-            utility.hideProgressDialog();
             return mView;
         } catch (InflateException e){
             Toast.makeText(mView.getContext(), "Hiba :(", Toast.LENGTH_LONG).show();
-            utility.hideProgressDialog();
             return mView;
         }
     }
