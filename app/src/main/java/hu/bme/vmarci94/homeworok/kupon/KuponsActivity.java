@@ -75,6 +75,8 @@ public class KuponsActivity extends AppCompatActivity
     private Sensor mAccelerometer;
     private ShakeDetector mShakeDetector;
 
+    Location currentLocation;
+
    @Override
     protected void onCreate(Bundle savedInstanceState) {
         //[START] Generált kód
@@ -115,6 +117,19 @@ public class KuponsActivity extends AppCompatActivity
             public void onShake(int count) {
                 //FIXME
                 Log.i("SENSOR:", "rázkódás érzékelve");
+                ArrayMap<String, Kupon> tmpKuponArr = kuponAdapter.getAllKupon();
+                int aku = 0;
+                for (int i = 0; i < tmpKuponArr.size(); i++) {
+                    Location tmpLoc = new Location("dummy");
+                    tmpLoc.setLatitude(tmpKuponArr.valueAt(i).getLatitude());
+                    tmpLoc.setLongitude(tmpKuponArr.valueAt(i).getLongitude());
+                    if (currentLocation != null && currentLocation.distanceTo(tmpLoc) <= 100) {
+                        aku++;
+                        Log.i("közeli kupon:", tmpKuponArr.valueAt(i).getCompany());
+                    }
+                }
+                if(aku > 0)
+                    Toast.makeText(KuponsActivity.this, "Most is épp " + Integer.toString(aku) + "db kupon van!", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -417,7 +432,7 @@ public class KuponsActivity extends AppCompatActivity
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Location currentLocation = intent.getParcelableExtra(ServiceLocation.KEY_LOCATION);
+            currentLocation = intent.getParcelableExtra(ServiceLocation.KEY_LOCATION);
 
             printLocationToLog(
                     currentLocation.getLatitude(),
